@@ -1,0 +1,268 @@
+﻿@using ForumIT.Models.Domain;
+@using Microsoft.AspNetCore.Identity;
+@using Microsoft.EntityFrameworkCore;
+@*model IEnumerable<ForumIT.Models.TblBaiViet>*@
+@using X.PagedList.Mvc.Core;
+
+        @model X.PagedList.IPagedList<TblBaiViet>
+   
+
+@inject UserManager<User> userManager
+@{
+    ForumITContext db = new ForumITContext();
+    //ViewData["Title"] = "Home";
+    //string set = ViewBag.Set;
+}
+
+@section Admin{
+    <div class="row">
+    <div class="col-md-6">
+            <h2>Home</h2>
+    </div>
+
+    <div class="col-md-6">
+        <div class="navbar-serch-right-side">
+            <form class="navbar-form" asp-action="Index" asp-controller="Home" >
+                <div class="input-group add-on">
+                        <input class="form-control form-control222" placeholder="Search" name="filter" id="srch-term" type="text" style="width:500px" value="@ViewBag.filter">
+                    <div class="input-group-btn">
+                        <button class="btn btn-default btn-default2913" type="submit"><i class="glyphicon glyphicon-search"></i></button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    </div>
+}
+
+@section Test{
+    <aside class="col-md-3 sidebar97239">
+        <div class="text-center"><h2>Loại Diễn Đàn</h2></div>
+        <div class="categori-part329">
+            @await Component.InvokeAsync("DienDanTheoLoai")
+        </div>
+    </aside>
+ }
+<!--a asp-action="Index" asp-route-filter="OK">Order BLuan</!--a>
+<a asp-action="Index" asp-route-filter="oki">Order Tuong Tac</a>
+<a asp-action="Index" asp-route-filter="TruyCap">Order Truy Cap</a>
+<button id="searchButton" onclick="confirmSearch()">Tìm kiếm</button>
+<button style="background-color: @ViewBag.Color ; padding:5px"><a id="filterLink" asp-action="Index" asp-route-filter="@ViewBag.Set" style="text-decoration: none; color:white">Post @ViewBag.Set</a></button>
+<a asp-action="Index" asp-route-filter="Top2">TOP2</a!-->
+@*<b>@ViewBag.Time</b>///<b>@ViewBag.Duration</b>
+<div id="clock"></div>
+<p id="counter"></p>*@
+
+        @foreach (var item in Model)
+        {
+            var users = await userManager.Users.ToListAsync();
+
+            var usersInfo = new List<User>();
+
+            string name="";
+
+            foreach (var user in users)
+            {
+                var userInfo = new User
+                    {
+                        Id = user.Id,
+                        UserName = user.UserName,
+                        Email = user.Email
+                        // Thêm các thông tin khác tùy ý
+                    };
+
+                usersInfo.Add(userInfo);
+            }
+            List<User> lst = usersInfo.ToList();
+
+            //var id = userManager.GetUserId(User);
+
+            foreach (var user in lst)
+            {
+                if (user.Id == item.IdUser)
+                {
+                    name = user.UserName;
+                }
+            }
+
+            TblLoaiDd xx=new TblLoaiDd();
+            xx=db.TblLoaiDds.Find(item.IdLdd);
+            string tenloai=xx.TenLoaiDd;
+
+            //string ndung = item.NoiDung;
+                //Test Display
+                List<TblBinhLuan> lbt = db.TblBinhLuans.Where(x => x.IdidBaiVietBl == item.IdBaiViet).ToList();
+                int countBL = lbt.Count();
+
+                int countTL = 0;
+
+                List<TblTraLoiBl> tll = new List<TblTraLoiBl>();
+
+                List<TblTraLoiBl> tbltl = db.TblTraLoiBls.ToList();
+
+                foreach (TblBinhLuan bll in lbt)
+                {
+                    foreach (TblTraLoiBl tloi in tbltl)
+                    {
+                        if (bll.IdBinhLuan == tloi.IdBluanTloi)
+                        {
+                            countTL++;
+                        }
+                    }
+                }
+
+                int tuongtac = countTL + countBL;
+    //End
+
+
+            <div class="blog-part3903">
+                <img src="/Uploads/@item.Img" alt="Image" class="img-responsive" width="100%" height="400px">
+
+                <div class="blog-details3902">
+                    <h3><span><i class="fa fa-picture-o" aria-hidden="true"></i></span> @item.Title</h3>
+                    <hr>
+                    <div class="ques-icon-info2933"> <a href="#"><i class="fa fa-user" aria-hidden="true"> @name </i></a> 
+                        <a href="#"><i class="fa fa-calendar" aria-hidden="true"> @item.Ngaydang</i></a> 
+                        <a href="#"><i class="fa fa-briefcase" aria-hidden="true"> @tenloai</i></a> 
+                        <a href="#"><i class="fa fa-comments-o" aria-hidden="true"> @countBL comments</i></a>
+                        <a href="#"><i class="fa fa-eye" aria-hidden="true"> @tuongtac viwes</i></a>
+            </div>
+                    <p>@item.NoiDung ...</p>
+                    <div class="continue-deatils738">
+                        <a asp-action="PostDetail" asp-controller="PostMN" asp-route-idBV="@item.IdBaiViet"><i class="fa fa-plus" aria-hidden="true"> Continue Reading</i></a>
+                    </div>
+                </div>
+            </div>
+}
+<div class="pagination">
+    @Html.PagedListPager(Model,page=>Url.Action("Index",new{page=page, filter=@ViewBag.Filters}))
+    </div>
+
+
+<script>
+
+    var filterLink = document.getElementById('filterLink');
+
+    // Thêm lắng nghe sự kiện click
+    filterLink.addEventListener('click', function (event) {
+        event.preventDefault(); // Ngăn chặn hành vi mặc định khi nhấp vào liên kết
+
+        // Lấy giá trị hiện tại của thuộc tính asp-route
+        var currentFilter = filterLink.getAttribute('asp-route-filter');
+
+        // Thay đổi giá trị của thuộc tính asp-route
+
+
+        // Thay đổi nội dung của thẻ <a>
+        filterLink.innerHTML = filterLink.getAttribute('asp-route-filter');
+
+        window.location.href = filterLink.href;
+
+        event.preventDefault();
+
+        if (currentFilter === 'Max') {
+            filterLink.setAttribute('asp-route-filter', 'Min');
+        } else {
+            filterLink.setAttribute('asp-route-filter', 'Max');
+        }
+
+    });
+
+    function confirmSearch() {
+        var searchQuery = prompt("Nhập từ khóa tìm kiếm:");
+        if (searchQuery) {
+            var xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    // Xử lý phản hồi từ máy chủ (nếu cần)
+                    //alert("Tìm kiếm thành công");
+                    document.getElementById("recordList").innerHTML = xhr.responseText;
+                }
+            };
+            xhr.open("GET", "/Home/Index?filter=" + searchQuery, true);
+            xhr.send();
+        }
+
+
+     function updateClock() {
+         $.ajax({
+             url: '/api/current-time', // Đường dẫn API trên máy chủ
+             method: 'GET',
+             success: function (response) {
+                 var currentTime = response.time;
+                 var clock = document.getElementById('clock');
+                 clock.innerText = currentTime; // Cập nhật hiển thị thời gian
+             },
+             error: function (xhr, status, error) {
+                 console.log(error); // Xử lý lỗi nếu có
+             },
+             complete: function () {
+                 setTimeout(updateClock, 1000); // Cập nhật lại sau mỗi giây
+             }
+         });
+     }*/
+    /*function updateClock() {
+        var now = new Date();
+        var clock = document.getElementById('clock');
+        clock.innerText = now.toLocaleTimeString(); // Cập nhật hiển thị thời gian
+        setTimeout(updateClock, 1000); // Cập nhật lại sau mỗi giây
+    }
+
+
+    updateClock(); // Bắt đầu cập nhật thời gian*/
+
+    /*function formatTime(seconds) {
+        var hours = Math.floor(seconds / 3600);
+        var minutes = Math.floor((seconds % 3600) / 60);
+        var remainingSeconds = seconds % 60;
+
+        var formattedTime = padZero(hours) + ":" + padZero(minutes) + ":" + padZero(remainingSeconds);
+        return formattedTime;
+    }
+
+    function padZero(value) {
+        return String(value).padStart(2, '0');
+    }
+
+    function updateCounter() {
+        var currentTime = Math.floor(Date.now() / 1000); // Lấy thời gian hiện tại tính bằng giây
+        var elapsedTime = currentTime - Math.floor(ViewBag.Convv/1000);
+
+        var formattedTime = formatTime(elapsedTime);
+        document.getElementById("counter").textContent = "Thời gian đã trôi qua: " + formattedTime;
+        setTimeout(updateCounter, 1000);
+    }
+
+    updateCounter();*/
+        //setInterval(updateCounter, 1000);
+        //var loginTime = Date.now();
+
+        //Chuẩn
+    /*var loginTime = new Date('@ViewBag.Convv');
+
+    function updateCounter() {
+        var currentTime = Date.now();
+        var elapsedTime = Math.floor((currentTime - loginTime) / 1000); // Chuyển đổi thành giây
+
+
+        var hours = Math.floor(elapsedTime / 3600);
+    var minutes = Math.floor((elapsedTime % 3600) / 60);
+        var seconds = elapsedTime % 60;
+
+        if (isNaN(hours) || isNaN(minutes) || isNaN(seconds)) {
+            document.getElementById("counter").textContent = "";
+        }
+        else {
+            var formattedTime = padZero(hours) + ":" + padZero(minutes) + ":" + padZero(seconds);
+            document.getElementById("counter").textContent = "Bạn đã đăng nhập được:"+ formattedTime;
+        }
+
+    }
+
+    function padZero(value) {
+        return String(value).padStart(2, '0');
+    }
+
+    setInterval(updateCounter, 1000); // Gọi hàm updateCounter mỗi giây
+
+</script>
